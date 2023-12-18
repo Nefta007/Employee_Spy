@@ -1,6 +1,7 @@
 //const cTable = require('console.table');
 const inquirer = require('inquirer');
 const connect = require('./config/connection');
+const { deprecate } = require('util');
 
 
 
@@ -103,42 +104,38 @@ function AddADepartment() {
 
 function AddARole() {
     //console.log("hello");
-    let department = [];
-    async function employeeDepartment(){
-        const localDepartment = ()=> {
-            connect.query(
-                `SELECT id,
-                dep_name FROM department`, (err, res) =>{
-                    if(err){
-                        console.log(err);
-                    }
-                })
-        }
-        department = localDepartment.map(({id, dep_name})=>({
-            depart_name: dep_name,
-            depart_value: id,
-        }))
-    }
-    inquirer.prompt([
-        {
-            type: 'input',
-            name: 'role_name',
-            message: 'What is the name of the role you wish to enter?'
-        },
-        {
-            type: 'number',
-            name: 'role_salary',
-            message: 'What is the salary for the new role?'
-        },
-        {
-            type: 'list',
-            name: 'roles_department',
-            message: 'What department does the role belong to?',
-            choices: department
-        }
-    ]).then(async(data)=>{
-        const {role_name, role_salary, role_department} = data;
-    })
+    const userDepo = `SELECT * FROM department`;
+    connect.query(userDepo, (err, ress) => {
+        if (err) throw err;
+        inquirer.prompt([
+            {
+                type: 'input',
+                name: 'role_name',
+                message: 'What is the name of the role you wish to enter?'
+            },
+            {
+                type: 'number',
+                name: 'role_salary',
+                message: 'What is the salary for the new role?'
+            },
+            {
+                type: 'list',
+                name: 'roles_department',
+                message: 'What department does the role belong to?',
+                choices: ress.map((roles_department)=>roles_department.dep_name),
+            }
+        ]).then((data) => {
+            const new_role = data.role_name;
+            const new_salary = data.role_salary;
+            const new_department = data.roles_department;
+            connect.promise().query(`
+            INSERT INTO roles (title, salary, department_id) VALUE(?)
+            FROM roles
+            JOIN department ON roles.department_id = department.id
+            `, new_role, new_salary, new_department);
+            ViewAllRoles();
+        })
+    });
 }
 
 function AddAnEmployee() {
