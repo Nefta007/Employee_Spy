@@ -1,17 +1,15 @@
+const { connect } = require('http2');
 const inquirer = require('inquirer');
-const management = require('./lib/employerAction')
-require('dotenv').config();
 const mysql = require('mysql2');
 
 const userConnect = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'process.env.DB_PASSWORD',
+    password: '',
     database: 'employee_db'
 });
-module.exports = userConnect;
 
-const init = () => {
+function init(){
     inquirer.prompt([
         {
             type: 'list',
@@ -29,8 +27,8 @@ const init = () => {
             ]
         }
     ]).then((answers) => {
-        const { employer_choice } = answers;
-        switch (employer_choice) {
+        const { user_choice } = answers;
+        switch (user_choice) {
             case "View all departments":
                 viewAllDepartments();
                 break;
@@ -83,3 +81,5 @@ function AddAnEmployee() {
 function UpdateAnEmployeeRole() {
     console.log("hello");
 }
+
+init();
