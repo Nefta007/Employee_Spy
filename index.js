@@ -104,8 +104,8 @@ function AddADepartment() {
 
 function AddARole() {
     //console.log("hello");
-    const userDepo = `SELECT * FROM department`;
-    connect.query(userDepo, (err, ress) => {
+    const userDepo = `SELECT dep_name, id AS value FROM department`;
+    connect.query(userDepo, (err, res) => {
         if (err) throw err;
         inquirer.prompt([
             {
@@ -120,18 +120,18 @@ function AddARole() {
             },
             {
                 type: 'list',
-                name: 'roles_department',
+                name: 'department',
                 message: 'What department does the role belong to?',
-                choices: ress.map((roles_department)=>roles_department.dep_name),
-            }
+                choices: res.map((department)=>department.dep_name),
+            },
         ]).then((data) => {
             //const new_role = data.role_name;
             //const new_salary = data.role_salary;
             //const new_department = data.roles_department;
+            const department = res.find((department)=> department.name === data.department);
             connect.promise().query(`
-            SELECT id, dep_name FROM department
-            INSET INTO roles SET ?
-            `, {title: data.role_name, salary: data.role_salary, department_id: data.roles_department});
+            INSERT INTO roles SET ?
+            `, {title: data.role_name, salary: data.role_salary, department_id: department},);
             ViewAllRoles();
         })
     });
