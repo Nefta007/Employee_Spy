@@ -1,9 +1,9 @@
 //const cTable = require('console.table');
 const inquirer = require('inquirer');
 const connect = require('./config/connection');
-const { deprecate } = require('util');
 
 
+connect
 
 function init() {
     inquirer.prompt([
@@ -46,35 +46,55 @@ function init() {
             case "Update an employee role":
                 UpdateAnEmployeeRole();
                 break;
+            case "Quit":
+                // quitfunction();
+                console.log("Thank you for your use");
+                break;
+            default:
+                console.log("Have a nice day!");
         }
     })
 };
 
-
+//changed code to call init()
 function viewAllDepartments() {
     // console.log("hello");
-    connect.promise().query(
-        `SELECT * FROM department`
-    ).then(([data]) => console.table(data));
+    const sql = `SELECT * FROM department`;
+    connect.query(sql, (err, res) => {
+        if (err) {
+            console.log(err);
+        };
+        console.table(res);
+        init();
+    }
+    );//.then(([data]) => console.table(data));
+    //init() does not display properly
 }
 
 function ViewAllRoles() {
     //console.log("hello");
-    connect.promise().query(`
+    const sql = `
     SELECT 
     roles.title,
     roles.id,
     roles.salary,
     department.dep_name AS department 
     FROM roles 
-    INNER JOIN department ON roles.department_id = department.id`)
-        .then(([data]) => console.table(data));
-
+    INNER JOIN department ON roles.department_id = department.id`;
+    connect.query(sql, (err, res) => {
+        if (err) {
+            console.log(err);
+        };
+        console.table(res);
+        init();
+    }
+    );
+    //.then(([data]) => console.table(data));
 }
 
 function ViewAllEmployees() {
     // console.log("hello");
-    connect.promise().query(`
+    const sql = `
     SELECT 
     employee.id,
     employee.first_name,
@@ -86,8 +106,16 @@ function ViewAllEmployees() {
     FROM employee
     JOIN roles ON employee.role_id = roles.id
     JOIN department ON roles.department_id = department.id
-    LEFT JOIN employee as manEmployee ON employee.manager_id = manEmployee.id`)
-        .then(([data]) => console.table(data));
+    LEFT JOIN employee as manEmployee ON employee.manager_id = manEmployee.id`
+    connect.query(sql, (err, res) => {
+        if (err) {
+            console.log(err);
+        };
+        console.table(res);
+        init();
+    }
+    );
+    //.then(([data]) => console.table(data));
 }
 
 function AddADepartment() {
@@ -234,5 +262,10 @@ function UpdateAnEmployeeRole() {
         });
     });
 }
+
+// function quitfunction(){
+//     console.log('Have a nice day');
+//     break
+// }
 
 init();
