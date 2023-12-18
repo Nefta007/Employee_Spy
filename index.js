@@ -210,20 +210,15 @@ function UpdateAnEmployeeRole() {
             inquirer.prompt([
                 {
                     type: 'list',
-                    name: 'chosen_employe',
+                    name: 'chosen_employee',
                     message: 'Which employee do you wish to update?',
                     choices: currEmployee
                 },
                 {
                     type: 'list',
                     name: 'newRoles',
-                    message: 'What will be the employees new role?'
-                },
-                {
-                    type: 'list',
-                    name: 'newManage',
-                    message: 'Who will be the employees manager?',
-                    choices: currEmployee,
+                    message: 'What will be the employees new role?',
+                    choices: currRoles
                 },
                 {
                     type: 'list',
@@ -233,7 +228,7 @@ function UpdateAnEmployeeRole() {
                 }
             ]).then((data) => {
                 connect.promise().query(`
-                UPDATE employee SET ? role_id = ${data.newRole}, manager_id= ${data.employee_manager} WHERE id= ${data.chosen_employee};`);
+                UPDATE employee SET role_id = ${data.newRoles}, manager_id= ${data.employee_manager} WHERE id= ${data.chosen_employee};`);
                 ViewAllEmployees();
             })
         });
