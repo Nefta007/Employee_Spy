@@ -106,8 +106,8 @@ function AddARole() {
     //console.log("hello");
     const userDepo = `SELECT * FROM department`;
     connect.query(userDepo, (err, res) => {
-        //if (err) throw err;
-        currDepartments = res.map((departments)=>({
+        if (err) throw err;
+        currDepartments = res.map((departments) => ({
             name: departments.dep_name,
             value: departments.id
         }));
@@ -131,18 +131,113 @@ function AddARole() {
         ]).then((data) => {
             connect.promise().query(`
             INSERT INTO roles SET ?
-            `, {title: data.role_name, salary: data.role_salary, department_id: data.role_department});
+            `, { title: data.role_name, salary: data.role_salary, department_id: data.role_department });
             ViewAllRoles();
         })
     });
 }
 
 function AddAnEmployee() {
-    console.log("hello");
+    //console.log("hello");
+    const userEmployee = `SELECT * FROM employee`;
+    connect.query(userEmployee, (err, res) => {
+        if (err) throw err;
+        currEmployee = res.map((Employees) => ({
+            name: Employees.first_name.concat(" ", Employees.last_name),
+            value: Employees.id
+        }));
+        const userDepo = `SELECT * FROM roles`;
+        connect.query(userDepo, (err, res) => {
+            if (err) throw err;
+            currRoles = res.map((roles) => ({
+                name: roles.title,
+                value: roles.id
+            }));
+            inquirer.prompt([
+                {
+                    type: 'input',
+                    name: 'firstName',
+                    message: 'What is the employees first name?'
+                },
+                {
+                    type: 'input',
+                    name: 'lastName',
+                    message: 'What is the employess last name?'
+                },
+                {
+                    type: 'list',
+                    name: 'role_list',
+                    message: 'What role is the employee in charge of?',
+                    choices: currRoles,
+                },
+                {
+                    type: 'list',
+                    name: 'employee_manager',
+                    message: "Who is the employees manager?",
+                    choices: currEmployee
+                }
+            ]).then((data) => {
+                connect.promise().query(`
+                INSERT INTO employee SET ?
+                `, { first_name: data.firstName, last_name: data.lastName, role_id: data.role_list, manager_id: data.employee_manager });
+                ViewAllEmployees();
+            })
+        });
+    });
 }
 
+// WHEN I choose to update an employee role
+// THEN I am prompted to select an employee 
+// to update and their new role and this 
+// information is updated in the database 
+
 function UpdateAnEmployeeRole() {
-    console.log("hello");
+    // console.log("hello");
+    const userEmployee = `SELECT * FROM employee`;
+    connect.query(userEmployee, (err, res) => {
+        if (err) throw err;
+        currEmployee = res.map((Employees) => ({
+            name: Employees.first_name.concat(" ", Employees.last_name),
+            value: Employees.id
+        }));
+        const userDepo = `SELECT * FROM roles`;
+        connect.query(userDepo, (err, res) => {
+            if (err) throw err;
+            currRoles = res.map((roles) => ({
+                name: roles.title,
+                value: roles.id
+            }));
+            inquirer.prompt([
+                {
+                    type: 'list',
+                    name: 'chosen_employe',
+                    message: 'Which employee do you wish to update?',
+                    choices: currEmployee
+                },
+                {
+                    type: 'list',
+                    name: 'newRoles',
+                    message: 'What will be the employees new role?'
+                },
+                {
+                    type: 'list',
+                    name: 'newManage',
+                    message: 'Who will be the employees manager?',
+                    choices: currEmployee,
+                },
+                {
+                    type: 'list',
+                    name: 'employee_manager',
+                    message: "Who is the employees manager?",
+                    choices: currEmployee
+                }
+            ]).then((data) => {
+                connect.promise().query(`
+                UPDATE employee SET ? role_id = ${data.newRole}, manager_id= ${data.employee_manager} WHERE id= ${data.chosen_employee};`);
+                ViewAllEmployees();
+            })
+        });
+    });
 }
 
 init();
