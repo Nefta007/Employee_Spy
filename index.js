@@ -125,14 +125,13 @@ function AddARole() {
                 choices: ress.map((roles_department)=>roles_department.dep_name),
             }
         ]).then((data) => {
-            const new_role = data.role_name;
-            const new_salary = data.role_salary;
-            const new_department = data.roles_department;
+            //const new_role = data.role_name;
+            //const new_salary = data.role_salary;
+            //const new_department = data.roles_department;
             connect.promise().query(`
-            INSERT INTO roles (title, salary, department_id) VALUE(?)
-            FROM roles
-            JOIN department ON roles.department_id = department.id
-            `, new_role, new_salary, new_department);
+            SELECT id, dep_name FROM department
+            INSET INTO roles SET ?
+            `, {title: data.role_name, salary: data.role_salary, department_id: data.roles_department});
             ViewAllRoles();
         })
     });
